@@ -1,4 +1,11 @@
-FROM php:8.1-fpm-alpine3.14
+FROM php:8.1-fpm-alpine as app
+
+#RUN apk add --no-cache \
+#    libzip-dev \
+#    zlib-dev \
+#    libxml2-dev
+#
+#RUN docker-php-ext-install zip dom
 
 ENV RUN_DEPS \
     zlib \
@@ -28,19 +35,23 @@ RUN echo 'memory_limit = -1' >> /usr/local/etc/php/conf.d/docker-php-memlimit.in
 RUN apk add --no-cache libzip-dev \
     && docker-php-ext-install zip
 
-# Set COMPOSER_ALLOW_SUPERUSER=1
+# Useful PHP extension installer image, copy binary into your container
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Copy the application code
-COPY . /app
-COPY . /var/www/html
-RUN chown -R www-data:www-data /var/www/html
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+# Copy composer files
+COPY ./app/composer.* ./
 
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Install dependencies
+RUN composer install
 
-# Install symfony/panther with version constraint and dependencies
-RUN composer req symfony/panther:2.1
-RUN composer update
+# Copy application files to the working directory
+COPY ./app .
+
+# Run composer dump-autoload --optimize
+RUN composer dump-autoload --optimize
 
 
 ENV PANTHER_NO_SANDBOX 1
@@ -56,4 +67,3 @@ RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIV
     tar -zxf geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz -C /usr/bin; \
     rm geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz
 
-VOLUME ["/app"]

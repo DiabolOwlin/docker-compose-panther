@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 use Symfony\Component\Panther\Client;
 
-require __DIR__.'/../var/www/html/vendor/autoload.php'; // Composer's autoloader
+require __DIR__.'/../vendor/autoload.php'; // Composer's autoloader
 
 $client = Client::createChromeClient();
 // Or, if you care about the open web and prefer to use Firefox
@@ -28,5 +28,3 @@ $crawler = $client->waitFor('#installing-the-framework');
 $crawler = $client->waitForVisibility('#installing-the-framework');
 
 echo $crawler->filter('#installing-the-framework')->text();
-
-$client->close();
