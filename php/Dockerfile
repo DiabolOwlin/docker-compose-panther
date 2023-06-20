@@ -1,11 +1,5 @@
 FROM php:8.1-fpm-alpine as app
 
-#RUN apk add --no-cache \
-#    libzip-dev \
-#    zlib-dev \
-#    libxml2-dev
-#
-#RUN docker-php-ext-install zip dom
 
 ENV RUN_DEPS \
     zlib \
