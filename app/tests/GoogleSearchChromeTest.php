@@ -12,9 +12,18 @@ class GoogleSearchChromeTest extends PantherTestCase
 
     public function testGoogleSearch()
     {
-        $client = Client::createFirefoxClient();
-        $size = new WebDriverDimension(1400, 1400);
-        $client->manage()->window()->maximize()->setSize($size);
+        $client = self::createPantherClient(
+            [],
+            [],
+            [
+                'chromedriver_arguments' => [
+                    '--log-path=myfile.log',
+                    '--log-level=DEBUG'
+                ],
+            ]
+        );
+//        $size = new WebDriverDimension(1400, 1400);
+//        $client->manage()->window()->maximize()->setSize($size);
         $crawler = $client->request('GET', 'https://www.google.com/');
         $button = $crawler->filter('#W0wltc');
         $button->click();
@@ -32,6 +41,8 @@ class GoogleSearchChromeTest extends PantherTestCase
 
             echo $title . ": " . $url . "\n";
         });
+        //line just to check browser, without it in case if all tests are successful it closes right after the last test performed
+//        sleep(100);
         $this->assertEquals('marcus rashford - Szukaj w Google', $client->getTitle());
         $client->quit();
 
@@ -39,3 +50,6 @@ class GoogleSearchChromeTest extends PantherTestCase
     }
 
 }
+
+
+

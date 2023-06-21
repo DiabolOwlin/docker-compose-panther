@@ -1,6 +1,5 @@
 FROM php:8.1-fpm-alpine as app
 
-
 ENV RUN_DEPS \
     zlib \
     libzip \
@@ -49,15 +48,20 @@ RUN composer dump-autoload --optimize
 
 
 ENV PANTHER_NO_SANDBOX 1
-# Not mandatory, but recommended
-ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
+ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage --no-sandbox --display=:0 --disable-gpu --disable-extensions --remote-debugging-port=9222'
+
 RUN apk add --no-cache chromium chromium-chromedriver
 
 # Firefox and GeckoDriver (optional)
-ARG GECKODRIVER_VERSION=0.28.0
+ARG GECKODRIVER_VERSION=0.32.1
 RUN apk add --no-cache firefox libzip-dev; \
     docker-php-ext-install zip
-RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIVER_VERSION/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz; \
-    tar -zxf geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz -C /usr/bin; \
-    rm geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz
+
+#needed for firefox testing, still have to make it work on one config with google
+#RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIVER_VERSION/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz; \
+#    tar -zxf geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz -C /usr/bin; \
+#    rm geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz
+
+RUN dpkg -i /tmp/chrome.deb || apk add -yf
+
 
