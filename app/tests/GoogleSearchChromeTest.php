@@ -12,6 +12,7 @@ class GoogleSearchChromeTest extends PantherTestCase
 
     public function testGoogleSearch()
     {
+        //i think panther client is more flexible and customisable than specific firefox/chrome clients
         $client = self::createPantherClient(
             [],
             [],
@@ -22,8 +23,11 @@ class GoogleSearchChromeTest extends PantherTestCase
                 ],
             ]
         );
-//        $size = new WebDriverDimension(1400, 1400);
-//        $client->manage()->window()->maximize()->setSize($size);
+        // we can adjust browser display resolution to our needs,
+        // be aware that dev tools window is covering part of the screen and will not be present on screenshot(so choose resolution considering dev tools)
+        // also choose resolution before using client's request method
+        $size = new WebDriverDimension(1920, 1080);
+        $client->manage()->window()->maximize()->setSize($size);
         $crawler = $client->request('GET', 'https://www.google.com/');
         $button = $crawler->filter('#W0wltc');
         $button->click();
@@ -31,6 +35,7 @@ class GoogleSearchChromeTest extends PantherTestCase
         $searchInput = $crawler->filter('.gLFyf');
         $searchInput->sendKeys('marcus rashford');
         $searchInput->sendKeys(WebDriverKeys::ENTER);
+        //refreshing crawler content after changing the page to a search result
         $crawler = $client->waitFor('.g');
         $client->takeScreenshot('screen.png'); // Yeah, screenshot!
         $results = $crawler->filter('div.g');
@@ -41,8 +46,8 @@ class GoogleSearchChromeTest extends PantherTestCase
 
             echo $title . ": " . $url . "\n";
         });
-        //line just to check browser, without it in case if all tests are successful it closes right after the last test performed
-//        sleep(100);
+        //sleep just to check browser, without it in case if all tests are successful it closes right after the last test performed
+        //sleep(100);
         $this->assertEquals('marcus rashford - Szukaj w Google', $client->getTitle());
         $client->quit();
 
